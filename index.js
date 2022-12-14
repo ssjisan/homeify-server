@@ -12,6 +12,8 @@ mongoose
   .then(() => console.log("DB Connected"))
   .catch((err) => console.log("DB error=>", err));
 
+  
+// Router middelware
 app.use("/api", authRouter);
 
 const port = process.env.PORT || 8000;
