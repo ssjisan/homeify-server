@@ -1,9 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import morgan from "morgan";
 import authRouter from "./Routes/auth.js";
 
 dotenv.config();
+
 mongoose.set("strictQuery", true);
 
 const app = express();
@@ -12,7 +14,10 @@ mongoose
   .then(() => console.log("DB Connected"))
   .catch((err) => console.log("DB error=>", err));
 
-  
+// Middelware
+app.use(morgan("dev"));
+app.use(express.json());
+
 // Router middelware
 app.use("/api", authRouter);
 
