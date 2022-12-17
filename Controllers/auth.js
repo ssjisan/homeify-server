@@ -1,5 +1,10 @@
 import User from "../Models/user.js";
 import { hashPassword, comparePassword } from "../Helper/auth.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
+// Register
 export const register = async (req, res) => {
   try {
     // 1. destructure name,email,password from req.body
@@ -27,8 +32,60 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
     }).save();
-    // 6. send response
-    res.json(user);
+    // 6. Create signed jwt
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expriesIn: "7d",
+    });
+    // 7. send response
+    res.json({
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+      },
+      token,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+//  Login
+export const login = async (req, res) => {
+  try {
+    // 1. destructure name,email,password from req.body
+    const { email, password } = req.body;
+    // 2. all fields require
+    if (!email) {
+      return res.json({ error: "Email is required" });
+    }
+    if (!password || password.lenght < 6) {
+      return res.json({ error: "Password lenght must be 6 char longs" });
+    }
+    // 3. email unique
+    const user = await User.findOne({ email });
+    if (user) {
+      res.json({ error: "User not found" });
+    }
+    // 4. compare password
+    const match = await comparePassword(password, user.password);
+    if (!match) {
+      res.json({ error: "Wrong Password" });
+    }
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expriesIn: "7d",
+    });
+    // 7. send response
+    res.json({
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+      },
+      token,
+    });
   } catch (err) {
     console.log(err);
   }
