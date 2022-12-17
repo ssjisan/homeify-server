@@ -34,7 +34,7 @@ export const register = async (req, res) => {
     }).save();
     // 6. Create signed jwt
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expriesIn: "7d",
+      expiresIn: "7d",
     });
     // 7. send response
     res.json({
@@ -63,9 +63,9 @@ export const login = async (req, res) => {
     if (!password || password.lenght < 6) {
       return res.json({ error: "Password lenght must be 6 char longs" });
     }
-    // 3. email unique
+    // 3. Find User using email
     const user = await User.findOne({ email });
-    if (user) {
+    if (!user) {
       res.json({ error: "User not found" });
     }
     // 4. compare password
@@ -74,9 +74,9 @@ export const login = async (req, res) => {
       res.json({ error: "Wrong Password" });
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expriesIn: "7d",
+      expiresIn: "7d",
     });
-    // 7. send response
+    // 5. send response
     res.json({
       user: {
         name: user.name,
